@@ -1,5 +1,7 @@
 ---
 title: "Vignette"
+author: "Chun En Chu & Hsiang Yu Wen"
+date: "12/6/2020"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{my-vignette}
@@ -14,49 +16,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-1. App Title and Names of group members
 
-Fuel and vehicle  
-Hsiang Yu Wen, Chun En Chu
-
-2. Description of the problem to be analyzed in the Shiny App
-
-Due to the rising price of fuel, the consumption of fuel by different car are getting more competitive, so we are going to analyzed the performance of different vehicle in market.
-
-3. Data source
-
-https://www.fueleconomy.gov/feg/ws/
-
-4. Overall layout
-
-We are going to analyze the best type of vehicle such as what kinds of vehicle is worth to have. Using the variable like alvtype, charge120, city MPG and so on to compare with. 
-
-5. Data Analysis and Visualization with User Choices and Results
-
-We want to show the best ghg score vehicle with plot and find the most fuel-efficient vehicle. Also we want to find the relation between displ with fuel cost and let the user type the price he/she are going to put and get how long the distance of vehicle can go. We also want to compare with the electricity vehicle and gas vehicle when the situation is in the same distance, and how much the price of energy would differ. Moreover, we want to find out that the vehicle with the start-stop system or not, in cityCD, how much the use of energe of it would differ. If we find anything special,  we would add on at any time. 
-
-
-
-6.
-We want to use t.test to find out that there is any significant relationship between CO2 with ghgscore. Also, use t.test to find out that there is any significant relationship between displ with city gasoline consumption. If we find anything special,  we would add on at any time. 
-
-
-7. Allocation of Responsibilities for the team
-
-Since we only have two people, we split the work half and half.
-
-
-8. Project Steps/Schedule
-
-Step1: load the data and tidy it (week 10)
-
-Step2: Build best function (week 11)
-
-Step3: create shiny app and set up the input (week 12)
-
-Step4: finish the output and test it (week 13)
-
-Step5: prepare presentation  (week 14)
 
 
 
