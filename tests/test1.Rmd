@@ -1,0 +1,205 @@
+---
+title: "Untitled"
+author: "ChunEn Chu"
+date: "2020/11/14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+```{r}
+#https://gasprices.aaa.com/state-gas-price-averages/
+tribble(~State, ~Regular, ~MidGrade,	~Premium, ~Diesel, 
+        'Alabama',	1.867,	2.201,	2.531,	2.233,
+        'Alaska',	2.493,	2.629,	2.799,	2.472,
+        'Arizona',	2.231,	2.514,	2.767,	2.400,
+        'Arkansas',	1.830,	2.140,	2.420,	2.126,
+        'California',	3.176,	3.355,	3.477,	3.342,
+        'Colorado',	2.173,	2.483,	2.766,	2.202,
+        'Connecticut',	2.133,	2.493,	2.711,	2.652,
+        'Delaware',	2.239,	2.614,	2.847,	2.311,
+        'District of Columbia',	2.272,	2.777,	2.858,	2.781,
+        'Florida',	1.993,	2.358,	2.653,	2.279,
+        'Georgia',	1.969,	2.311,	2.618,	2.402,
+        'Hawaii',	3.261,	3.438,	3.658,	4.065,
+        'Idaho',	2.305,	2.475,	2.667,	2.593,
+        'Illinois',	2.234,	2.588,	2.987,	2.411,
+        'Indiana',	1.993,	2.326,	2.648,	2.452,
+        'Iowa',	1.986,	2.153,	2.543,	2.198,
+        'Kansas',	1.881,	2.130,	2.374,	2.112,
+        'Kentucky',	1.964,	2.282,	2.596,	2.229,
+        'Louisiana',	1.848,	2.162,	2.477,	2.183,
+        'Maine',	2.143,	2.472,	2.727,	2.461,
+        'Maryland',	2.259,	2.690,	2.935,	2.437,
+        'Massachusetts',	2.075,	2.442,	2.662,	2.525,
+        'Michigan',	2.066,	2.395,	2.724,	2.388,
+        'Minnesota',	1.974,	2.216,	2.525,	2.323,
+        'Mississippi',	1.808,	2.118,	2.436,	2.066,
+        'Missouri',	1.772,	2.031,	2.291,	1.993,
+        'Montana',	2.226,	2.487,	2.732,	2.285,
+        'Nebraska',	2.062,	2.173,	2.513,	2.194,
+        'Nevada',	2.602,	2.821,	3.005,	2.618,
+        'New Hampshire',	2.026,	2.416,	2.674,	2.421,
+        'New Jersey',	2.210,	2.595,	2.769,	2.481,
+        'New Mexico',	2.029,	2.340,	2.589,	2.280,
+        'New York',	2.229,	2.558,	2.792,	2.759,
+        'North Carolina',	1.970,	2.316,	2.645,	2.284,
+        'North Dakota',	2.009,	2.225,	2.428,	2.246,
+        'Ohio',	1.974,	2.316,	2.650,	2.401,
+        'Oklahoma',	1.815,	2.069,	2.281,	1.988,
+        'Oregon',	2.592,	2.765,	2.937,	2.681,
+        'Pennsylvania',	2.474,	2.785,	3.058,	2.755,
+        'Rhode Island',	2.086,	2.484,	2.702,	2.580,
+        'South Carolina',	1.896,	2.236,	2.553,	2.120,
+        'South Dakota',	2.088,	2.209,	2.558,	2.235,
+        'Texas',	1.812,	2.139,	2.428,	2.000,
+        'Utah',	2.321,	2.486,	2.645,	2.621,
+        'Vermont',	2.121,	2.469,	2.753,	2.480,
+        'Virginia',	2.032,	2.430,	2.719,	2.314,
+        'Washington',	2.761,	2.974,	3.139,	2.787,
+        'West Virginia',	2.164,	2.449,	2.738,	2.369,
+        'Wisconsin',	1.940,	2.288,	2.660,	2.184,
+        'Wyoming',	2.187,	2.396,	2.636,	2.416) -> fuel_price
+fuel_price
+```
+
+
+```{r}
+#convert the fuel_type into 5 types, than the year affect the cartype since there are same cartype but different perfomance, than we filter the year but still get the duplicate since the trany is different that will affect the city08 and have a same name same year cartype but different city08 happen
+
+#find out every make-model car and plot the top 10 highest mpg from city08 in different fuelType https://gasprices.aaa.com/state-gas-price-averages/.
+#fueltype1 = Electricity, 
+fuel <-  read_csv("../data/vehicles.csv")
+
+fuel%>%
+  group_by(fuelType)%>%
+  count() %>%
+  arrange(n)%>%
+  ungroup()
+fuel%>%
+  select(fuelType)%>%
+  mutate_all(as.factor)%>%
+  mutate_all(~fct_lump(.x, n=5))%>%
+  unique()%>%
+  filter(fuelType != 'Other') -> fuel_1
+#把fuelType 整理成Premiun, Regular, Diesel, Gasline or E85,Electricity, Hybrid&spicial fuel
+#fct_lump OR fct_other.
+#fuel%>%
+#recode(fuelType, 'Regular Gas or Electricity' = "Hybrid&spicial", 'Gasoline or propane' = "Hybrid&spicial")
+head(fuel)
+fuel%>%
+  filter(fuelType == "Regular")%>%
+  select(make, city08, model,fuelType)%>%
+  unite(make, model, col = "cartype", sep =" ")%>%
+  #filter(year >=2017)%>%
+  unique()%>%
+  #group_by(fuelType)%>%
+  slice_max(city08,n =5)%>%
+  ggplot(aes(x = cartype, y= city08))+
+  #不一定要用bar表示 選個最合適的
+  geom_col()+
+  coord_flip() +
+  #compare fuelType and year and do some explain
+  facet_grid(fuelType ~ year)
+```
+
+```{r}
+#https://www.epa.gov/greenvehicles/greenhouse-gas-rating
+#make ggplot to show the one type which has the highest ghg score in barplot and it mean the cleanest
+fuel%>%
+  filter(year == "2003")%>%
+  filter(fuelType == "Regular")%>%
+  unite(make, model, col = "cartype", sep =" ")%>%
+  #add city08 to compare with ghgscore
+  select(cartype, ghgScore, city08,year)%>%
+  unique()%>%
+  slice_max(city08, n =5)%>%
+  ggplot(aes(x = cartype, y  = city08, fill = factor(ghgScore)))+
+  geom_col()+
+  coord_flip()
+
+fuel%>%
+  filter(year == "2003")%>%
+  filter(fuelType == "Regular")%>%
+  unite(make, model, col = "cartype", sep =" ")%>%
+#  filter(cartype == "Honda Insight" )%>%
+  select(cartype, ghgScore, city08,year,trany)%>%
+  unique()
+fuel%>%
+  select(trany)%>%
+  unique()
+```
+```{r}
+fuel%>%
+  select(year, ghgScore, make, model, city08)%>%
+  filter(year == '2020')%>%
+   unite(make, model, col = "cartype", sep =" ")%>%
+  filter()
+  
+```
+
+
+```{r}
+#fuelCost08 - annual fuel cost, displ - engine displacement in liters
+fuel%>%
+  select(displ, fuelCost08)%>%
+  ggplot(aes( x= displ, y= fuelCost08))+
+  geom_point()+
+  geom_smooth(method = lm, se = FALSE)
+  theme_bw()
+lm(fuel$fuelCost08~fuel$displ) ->x
+summary(x)
+#Since the p-value is less than .05 there is an significance meaning between fuelCost08 and displ.
+```
+
+```{r}
+fuel%>%
+  select(make, city08, model,fuelType)%>%
+  unite(make, model, col = "cartype", sep =" ")%>%
+  unique()%>%
+  pivot_wider(names_from = cartype, values_from = city08)
+```
+
+```{r}
+t.test(fuel$city08,fuel$ghgScore)
+```
+```{r}
+fuel%>%
+        filter(year == 2003)%>%
+        filter(fuelType == 'Regular')%>%
+        select(make, city08, model,fuelType, ghgScore,trany)%>%
+        unite(make, model, col = "cartype", sep =" ")%>%
+  unite(cartype, trany, col = "cartype", sep= " - ")%>%
+        unique()%>%
+        slice_max(city08,n =5)%>%
+        ggplot(aes(x = cartype, y = city08,fill = ))+
+        geom_col()+
+  ylab("miles per gallon")+
+        coord_flip()+
+        theme_bw()
+```
+
+```{r}
+#city08 - city MPG,co2 - tailpipe CO2 in grams/mile ,displ - engine displacement in liters, cylinders - engine cylinders, fuelCost08-annual fuel cost, ghgScore - EPA GHG score
+#x axis = displ, cylinders y = ghgScore, annual fuel cost, city08, co2
+fuel%>%
+  keep(is.numeric)-> fuel_2
+
+y = 1.03987
+summary(x)$residual%>%summary()
+summary(x)$coefficients
+fuel_2%>%
+  select(displ)
+lm(cylinders~fuelCost08, fuel_2)-> x
+x
+predict.lm(x,data.frame(fuelCost08 = 15))
+```
+```{r}
+data.frame(c(10))-> df
+colnames(df)<- "city08"
+df
+```
+
