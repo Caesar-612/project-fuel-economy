@@ -216,6 +216,378 @@ ui <- dashboardPage(
 )
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
+  observeEvent(input$fuel_type_1, {
+    if(!(is.null(input$fuel_type_1))){
+      years <- vehicles %>% 
+        filter(Fuel_Type %in% input$fuel_type_1) %>% 
+        select(Model_Year) %>% distinct(Model_Year) %>% pull(Model_Year) %>% sort()
+      first_year <- years[1]
+      last_year <- tail(years, n=1)
+      updateSliderTextInput(session, inputId = "year",
+                            choices = years,
+                            selected = c(first_year, last_year)
+      )
+    }else{
+      updateSliderTextInput(session, inputId = "year",
+                            choices = c(0,0),
+                            selected = c(0,0)
+      )
+    }
+  }, ignoreInit = TRUE,ignoreNULL = F)
+  nonE_pldt_MPG <- reactive({
+    if(!(is.null(input$fuel_type_1)) & !(is.null(input$roadType))){
+      vhc_change_nonElec %>% filter(Model_Year >= input$year[1] & Model_Year <= input$year[2] & Fuel_Type %in% input$fuel_type_1 & Road_Type %in% input$roadType) %>%
+        group_by(Fuel_Type, Road_Type) %>%
+        summarise(avg_MPG = round(mean(MPG), 2))
+    }else if(!(is.null(input$roadType))){
+      vhc_change_nonElec %>% filter(Road_Type %in% input$roadType) %>%
+        group_by(Road_Type) %>%
+        summarise(avg_MPG = round(mean(MPG), 2))
+    }else if(!(is.null(input$fuelType))){
+      vhc_change_nonElec %>% filter(Fuel_Type %in% input$fuel_type_1) %>%
+        group_by(Fuel_Type) %>%
+        summarise(avg_MPG = round(mean(MPG), 2))
+    }else{
+      # xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      vhc_change_nonElec %>%
+        group_by(Fuel_Type) %>%
+        summarise(avg_MPG = round(mean(MPG), 2))
+    }
+  })
+  nonE_pldt_GHG <- reactive({
+    if(!(is.null(input$fuel_type_1)) & !(is.null(input$roadType))){
+      vhc_change_nonElec %>% filter(Model_Year >= input$year[1] & Model_Year <= input$year[2] & Fuel_Type %in% input$fuel_type_1 & Road_Type %in% input$roadType) %>%
+        group_by(Fuel_Type, Road_Type) %>%
+        summarise(avg_GHG = round(mean(GHG), 2))
+    }else if(!(is.null(input$roadType))){
+      vhc_change_nonElec %>% filter(Road_Type %in% input$roadType) %>%
+        group_by(Road_Type) %>%
+        summarise(avg_GHG = round(mean(GHG), 2))
+    }else if(!(is.null(input$fuelType))){
+      vhc_change_nonElec %>% filter(Fuel_Type %in% input$fuel_type_1) %>%
+        group_by(Fuel_Type) %>%
+        summarise(avg_GHG = round(mean(GHG), 2))
+    }else{
+      # xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      vhc_change_nonElec %>%
+        group_by(Fuel_Type) %>%
+        summarise(avg_MPG = round(mean(MPG), 2))
+    }
+  })
+  nonE_pldt_Cost <- reactive({
+    if(!(is.null(input$fuel_type_1)) & !(is.null(input$roadType))){
+      vhc_change_nonElec %>% filter(Model_Year >= input$year[1] & Model_Year <= input$year[2] & Fuel_Type %in% input$fuel_type_1 & Road_Type %in% input$roadType) %>%
+        group_by(Fuel_Type, Road_Type) %>%
+        summarise(avg_Cost = round(mean(Annual_Fuel_Cost), 2))
+    }else if(!(is.null(input$roadType))){
+      vhc_change_nonElec %>% filter(Road_Type %in% input$roadType) %>%
+        group_by(Road_Type) %>%
+        summarise(avg_Cost = round(mean(Annual_Fuel_Cost), 2))
+    }else if(!(is.null(input$fuelType))){
+      vhc_change_nonElec %>% filter(Fuel_Type %in% input$fuel_type_1) %>%
+        group_by(Fuel_Type) %>%
+        summarise(avg_Cost = round(mean(Annual_Fuel_Cost), 2))
+    }else{
+      # xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      vhc_change_nonElec %>%
+        group_by(Fuel_Type) %>%
+        summarise(avg_MPG = round(mean(MPG), 2))
+    }
+  })
+  output$non_ele_aveMPG <- renderPlot({
+    ggplot(nonE_pldt_MPG(), aes(x=Fuel_Type, y=avg_MPG, fill=Road_Type)) +
+      geom_bar(position = position_dodge(), stat="identity")+
+      xlab("Fuel Type") + ylab("Average MPG") +
+      theme_minimal()+
+      theme(legend.title = element_blank(), axis.title.x = element_blank(), legend.position="bottom", legend.box = "horizontal") +
+      ggtitle("Average MPG")+
+      geom_text(size = 3,position = position_dodge(width= 1), aes(y=avg_MPG-3,label = avg_MPG), angle=0) +
+      scale_x_discrete(limits=unique(nonE_pldt_MPG()$Fuel_Type))
+    
+  }, height = 450)
+  output$non_ele_aveGHG <- renderPlot({
+    ggplot(nonE_pldt_GHG(), aes(x=Fuel_Type, y=avg_GHG, fill=Road_Type)) +
+      geom_bar(position = position_dodge(), stat="identity")+
+      xlab("Fuel Type") + ylab("Average GHG") +
+      theme_minimal()+
+      theme(legend.title = element_blank(), axis.title.x = element_blank(), legend.position="bottom", legend.box = "horizontal") +
+      ggtitle("Average GHG")+
+      geom_text(size = 3,position = position_dodge(width= 1), aes(y=avg_GHG,label = avg_GHG), angle=0) +
+      scale_x_discrete(limits=unique(nonE_pldt_GHG()$Fuel_Type))
+  }, height = 450)
+  output$non_ele_aveCost <- renderPlot({
+    ggplot(nonE_pldt_Cost(), aes(x=Fuel_Type, y=avg_Cost, fill=Road_Type)) +
+      geom_bar(position = position_dodge(), stat="identity")+
+      xlab("Fuel Type") + ylab("Average Cost") +
+      theme_minimal()+
+      theme(legend.title = element_blank(), axis.title.x = element_blank(), legend.position="bottom", legend.box = "horizontal") +
+      ggtitle("Average Fuel Cost")+
+      geom_text(size = 3,position = position_dodge(width= 1), aes(y=avg_Cost-1,label = avg_Cost), angle=45) +
+      scale_x_discrete(limits=unique(nonE_pldt_Cost()$Fuel_Type))
+    
+  }, height = 450)
+  
+  E_pldt_elecomsump <- reactive({
+    if(!(is.null(input$fuel_type_1)) & !(is.null(input$roadType))){
+      vhc_change_E %>% filter(Model_Year >= input$year[1] & Model_Year <= input$year[2] & Road_Type %in% input$roadType) %>%
+        group_by(Road_Type) %>%
+        summarise(avg_MPG = round(mean(Electricity_Consumption), 2)) 
+    }else if(is.null(input$fuel_type_1) & !(is.null(is.null(input$roadType)))){
+      vhc_change_E %>% filter(Road_Type %in% input$roadType) %>% 
+        group_by(Road_Type) %>%
+        summarise(avg_MPG = round(mean(Electricity_Consumption), 2)) 
+    }else {
+      vhc_change_E %>% filter(Road_Type %in% roadType) %>% 
+        group_by(Fuel_Type) %>%
+        summarise(avg_MPG = round(mean(Electricity_Consumption), 2))
+    }
+    
+  })
+  E_pldt_GHG <- reactive({
+    if(!(is.null(input$fuel_type_1)) & !(is.null(input$roadType))){
+      vhc_change_E %>% filter(Model_Year >= input$year[1] & Model_Year <= input$year[2] & Road_Type %in% input$roadType) %>%
+        group_by(Road_Type) %>%
+        summarise(avg_GHG = round(mean(GHG), 2)) 
+    }else if(is.null(input$fuel_type_1) & !(is.null(is.null(input$roadType)))){
+      vhc_change_E %>% filter(Road_Type %in% input$roadType) %>% 
+        group_by(Road_Type) %>%
+        summarise(avg_GHG = round(mean(GHG), 2)) 
+    }else {
+      vhc_change_E %>% filter(Road_Type %in% roadType) %>% 
+        group_by(Fuel_Type) %>%
+        summarise(avg_GHG = round(mean(GHG), 2))
+    }
+    
+  })
+  E_pldt_Cost <- reactive({
+    if(!(is.null(input$fuel_type_1)) & !(is.null(input$roadType))){
+      vhc_change_E %>% filter(Model_Year >= input$year[1] & Model_Year <= input$year[2] & Road_Type %in% input$roadType) %>%
+        group_by(Road_Type) %>%
+        summarise(avg_Cost = round(mean(Annual_Fuel_Cost), 2)) 
+    }else if(is.null(input$fuel_type_1) & !(is.null(is.null(input$roadType)))){
+      vhc_change_E %>% filter(Road_Type %in% input$roadType) %>% 
+        group_by(Road_Type) %>%
+        summarise(avg_Cost = round(mean(Annual_Fuel_Cost), 2)) 
+    }else {
+      vhc_change_E %>% filter(Road_Type %in% roadType) %>% 
+        group_by(Fuel_Type) %>%
+        summarise(avg_Cost = round(mean(Annual_Fuel_Cost), 2))
+    }
+    
+  })
+  output$ele_aveELE <- renderPlot({
+    
+    if(!(is.null(input$roadType))){
+      E_plot <- ggplot(E_pldt_elecomsump(), aes(x=Road_Type, y=avg_MPG, fill=Road_Type)) +
+        geom_bar(position = position_dodge(), stat="identity")+
+        xlab("Road Type") + ylab("Average Electricity Consumption (kwh/100 miles)") +
+        theme_minimal()+
+        theme(legend.title = element_blank(), axis.title.x = element_blank(), legend.position="bottom", legend.box = "horizontal") +
+        ggtitle("Electricity Consumption in kwh/100 miles (City/Highway/Combined)")
+      
+      E_plot + geom_text(size = 5,position = position_dodge(width= 0.9), aes(y=avg_MPG-3,label = avg_MPG), angle=0) +
+        scale_x_discrete(limits=unique(E_pldt_elecomsump()$Road_Type))
+    }else{
+      E_plot <- ggplot(vhc_change_E %>% filter(Road_Type %in% roadType) %>% 
+                         group_by(Fuel_Type) %>%
+                         summarise(avg_MPG = round(mean(Electricity_Consumption), 2)), aes(x=Fuel_Type, y=avg_MPG, color=Fuel_Type)) +
+        geom_bar(position = position_dodge(), stat="identity")+
+        xlab("Fuel Type") + ylab("Average Electricity Consumption (kwh/100 miles)") +
+        theme_minimal()+
+        theme(legend.title = element_blank(), axis.title.x = element_blank(), legend.position="bottom", legend.box = "horizontal") +
+        ggtitle("Electricity_Consumption in kwh/100 miles (City/Highway/Combined)")
+      
+      E_plot + geom_text(size = 5,position = position_dodge(width= 0.9), aes(y=avg_MPG-3,label = avg_MPG), angle=0) +
+        scale_x_discrete(limits=unique(E_pldt_elecomsump()$Fuel_Type))
+    }
+  }, height = 450)
+  output$ele_aveGHG <- renderPlot({
+    
+    if(!(is.null(input$roadType))){
+      E_plot <- ggplot(E_pldt_GHG(), aes(x=Road_Type, y=avg_GHG, fill=Road_Type)) +
+        geom_bar(position = position_dodge(), stat="identity")+
+        xlab("Road Type") + ylab("Average GHG") +
+        theme_minimal()+
+        theme(legend.title = element_blank(), axis.title.x = element_blank(), legend.position="bottom", legend.box = "horizontal") 
+      
+      E_plot + geom_text(size = 5,position = position_dodge(width= 0.9), aes(y=avg_GHG-3,label = avg_GHG), angle=0) +
+        scale_x_discrete(limits=unique(E_pldt_GHG()$Road_Type))
+    }else{
+      E_plot <- ggplot(vhc_change_E %>% filter(Road_Type %in% roadType) %>% 
+                         group_by(Fuel_Type) %>%
+                         summarise(avg_GHG = round(mean(GHG), 2)), aes(x=Fuel_Type, y=avg_GHG, color=Fuel_Type)) +
+        geom_bar(position = position_dodge(), stat="identity")+
+        xlab("Fuel Type") + ylab("GHG") +
+        theme_minimal()+
+        theme(legend.title = element_blank(), axis.title.x = element_blank(), legend.position="bottom", legend.box = "horizontal")
+      
+      E_plot + geom_text(size = 5,position = position_dodge(width= 0.9), aes(y=avg_MPG-3,label = avg_MPG), angle=0) +
+        scale_x_discrete(limits=unique(E_pldt_GHG()$Fuel_Type))
+    }
+  },height = 450)
+  output$ele_aveCost <- renderPlot({
+    
+    if(!(is.null(input$roadType))){
+      E_plot <- ggplot(E_pldt_Cost(), aes(x=Road_Type, y=avg_Cost, fill=Road_Type)) +
+        geom_bar(position = position_dodge(), stat="identity")+
+        xlab("Road Type") + ylab("Average Annual Fuel Cost") +
+        theme_minimal()+
+        theme(legend.title = element_blank(), axis.title.x = element_blank(), legend.position="bottom", legend.box = "horizontal") 
+      
+      E_plot + geom_text(size = 5,position = position_dodge(width= 0.9), aes(y=avg_Cost-3,label = avg_Cost), angle=0) +
+        scale_x_discrete(limits=unique(E_pldt_Cost()$Road_Type))
+    }else{
+      E_plot <- ggplot(E_pldt_Cost(), aes(x=Fuel_Type, y=avg_Cost, color=Fuel_Type)) +
+        geom_bar(position = position_dodge(), stat="identity")+
+        xlab("Fuel Type") + ylab("Annual Fuel Cost") +
+        theme_minimal()+
+        theme(legend.title = element_blank(), axis.title.x = element_blank(), legend.position="bottom", legend.box = "horizontal")
+      
+      E_plot + geom_text(size = 5,position = position_dodge(width= 0.9), aes(y=avg_Cost-3,label = avg_Cost), angle=0) +
+        scale_x_discrete(limits=unique(E_pldt_Cost()$Fuel_Type))
+    }
+  },height = 450)
+  ###########################################################################
+  observeEvent(input$fuelType, {
+    if(!(is.null(input$fuelType))){
+      makes <- vehicles %>% 
+        filter(Fuel_Type %in% input$fuelType) %>% 
+        select(Manufacture) %>% distinct(Manufacture) %>% pull(Manufacture) %>% sort()
+      updatePickerInput(session, inputId = "make",
+                        choices = makes,
+                        selected = makes[1]
+      )
+    }else{
+      updatePickerInput(session, inputId = "make",
+                        choices = "",
+                        selected = ""
+      )
+    }
+  }, ignoreInit = TRUE,ignoreNULL = F)
+  ghgTable <- reactive(({
+    if(!(is.null(input$fuelType)) & is.null(input$make)){
+      vehicles %>% select(Manufacture, Fuel_Type, Model, Model_Year, GHG) %>%
+        filter(Fuel_Type %in% input$fuelType) %>%
+        distinct(.keep_all = True) %>%
+        # group_by(Fuel_Type, Manufacture) %>%
+        arrange(desc(GHG), desc(Fuel_Type),desc(Manufacture))
+    }else{
+      vehicles %>% select(Manufacture, Fuel_Type, Model, Model_Year, GHG) %>%
+        filter(Fuel_Type %in% input$fuelType & Manufacture %in% input$make) %>%
+        distinct(.keep_all = True) %>%
+        # group_by(Fuel_Type, Manufacture) %>%
+        arrange(desc(GHG),desc(Fuel_Type), desc(Manufacture))
+    }
+  }))
+  mpgTable <- reactive(({
+    if(!(is.null(input$fuelType)) & is.null(input$make)){
+      vhc_change_nonElec %>% select(Manufacture, Fuel_Type, Model, Model_Year, MPG) %>%
+        filter(Fuel_Type %in% input$fuelType) %>%
+        distinct(.keep_all = True) %>%
+        arrange(desc(MPG), desc(Fuel_Type),desc(Manufacture))
+    }else{
+      vhc_change_nonElec %>% select(Manufacture, Fuel_Type, Model, Model_Year, MPG) %>%
+        filter(Fuel_Type %in% input$fuelType & Manufacture %in% input$make) %>%
+        distinct(.keep_all = True) %>%
+        # group_by(Fuel_Type, Manufacture) %>%
+        arrange(desc(MPG),desc(Fuel_Type), desc(Manufacture))
+    }
+  }))
+  costTable <- reactive(({
+    if(!(is.null(input$fuelType)) & is.null(input$make)){
+      vehicles %>% select(Manufacture, Fuel_Type, Model, Model_Year, Annual_Fuel_Cost) %>%
+        filter(Fuel_Type %in% input$fuelType) %>%
+        distinct(.keep_all = True) %>%
+        arrange(desc(Annual_Fuel_Cost), desc(Fuel_Type),desc(Manufacture))
+    }else{
+      vehicles %>% select(Manufacture, Fuel_Type, Model, Model_Year, Annual_Fuel_Cost) %>%
+        filter(Fuel_Type %in% input$fuelType & Manufacture %in% input$make) %>%
+        distinct(.keep_all = True) %>%
+        arrange(desc(Annual_Fuel_Cost),desc(Fuel_Type), desc(Manufacture))
+    }
+  }))
+  output$ghgTable <- renderDataTable(DT::datatable({
+    ghg_table <-ghgTable()
+    ghg_table
+    
+  }))
+  output$mpgTable <- renderDataTable(DT::datatable({
+    mpg_table <-mpgTable()
+    mpg_table
+    
+  }))
+  output$costTable <- renderDataTable(DT::datatable({
+    cost_table <-costTable()
+    cost_table
+    
+  }))
+  
+  hist_d_ghg <- reactive({
+    if(!(is.null(input$make))){
+      vehicles %>% select(Manufacture, Model, Model_Year, Fuel_Type, GHG) %>%
+        filter(GHG!= -1 & Fuel_Type %in% input$fuelType & Manufacture %in% input$make)
+    }else{
+      vehicles %>% select(Manufacture, Model, Model_Year, Fuel_Type, GHG) %>%
+        filter(GHG!= -1 & Fuel_Type %in% input$fuelType)
+    }
+    
+  })
+  hist_d_mpg <- reactive({
+    if(!(is.null(input$make))){
+      vhc_change_nonElec %>% select(Manufacture, Model, Model_Year, Fuel_Type, MPG) %>%
+        filter(Fuel_Type %in% input$fuelType & Manufacture %in% input$make)
+    }else{
+      vhc_change_nonElec %>% select(Manufacture, Model, Model_Year, Fuel_Type, MPG) %>%
+        filter(Fuel_Type %in% input$fuelType)
+    }
+    
+  })
+  hist_d_cost <- reactive({
+    if(!(is.null(input$make))){
+      vhc_change_nonElec %>% select(Manufacture, Model, Model_Year, Fuel_Type, Annual_Fuel_Cost) %>%
+        filter(Fuel_Type %in% input$fuelType & Manufacture %in% input$make)
+    }else{
+      vhc_change_nonElec %>% select(Manufacture, Model, Model_Year, Fuel_Type, Annual_Fuel_Cost) %>%
+        filter(Fuel_Type %in% input$fuelType)
+    }
+    
+  })
+  output$distGHG <- renderPlotly({
+    ghg_hist <- plot_ly(hist_d_ghg(), x = ~GHG, type = "histogram",
+                        marker = list(color = "lightgray", 
+                                      line = list(color = "darkgray", width = 2)),
+                        hovertemplate = paste(
+                          "%{xaxis.title.text}: %{x}<br>",
+                          "Count: %{y:,.0f}<br><extra></extra>")) %>%
+      layout(barmode="overlay",bargap=0.1,
+             title = "Distribution of GHG",hovermode="unified")
+    
+    ghg_hist
+  })
+  output$distMPG <- renderPlotly({
+    ghg_hist <- plot_ly(hist_d_mpg(), x = ~MPG, type = "histogram",
+                        marker = list(color = "lightgray", 
+                                      line = list(color = "darkgray", width = 2)),
+                        hovertemplate = paste(
+                          "%{xaxis.title.text}: %{x}<br>",
+                          "Count: %{y:,.0f}<br><extra></extra>")) %>%
+      layout(barmode="overlay",bargap=0.1,
+             title = "Distribution of MPG",hovermode="unified")
+    
+    ghg_hist
+  })
+  output$distCost <- renderPlotly({
+    ghg_hist <- plot_ly(hist_d_cost(), x = ~Annual_Fuel_Cost, type = "histogram",
+                        marker = list(color = "lightgray", 
+                                      line = list(color = "darkgray", width = 2)),
+                        hovertemplate = paste(
+                          "%{xaxis.title.text}: %{x}<br>",
+                          "Count: %{y:,.0f}<br><extra></extra>")) %>%
+      layout(barmode="overlay",bargap=0.1,
+             title = "Distribution of Annual Fuel Cost",hovermode="unified")
+    
+    ghg_hist
+  })
 }
 # Run the application 
 shinyApp(ui = ui, server = server)
