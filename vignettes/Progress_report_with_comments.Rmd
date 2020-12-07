@@ -1,0 +1,92 @@
+---
+title: "Vignette"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{my-vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+1. App Title and Names of group members
+
+Fuel and vehicle  
+Hsiang Yu Wen, Chun En Chu
+
+2. Description of the problem to be analyzed in the Shiny App
+
+Due to the rising price of fuel, the consumption of fuel by different car are getting more competitive, so we are going to analyzed the performance of different vehicle in market.
+```{block}
+Keep in mind the purpose of the app is for others to do an analysis. You will do at least one to show the use case but it really providing users choices by which they can do their own analysis.
+
+The descriptions is a bit short. Suggest some additional focus on enabling others to use multiple attributes of cars to predict fuel economy and compare trends in fuel economy across time and different aspects of cars.
+```
+
+
+3. Data source
+
+https://www.fueleconomy.gov/feg/ws/
+```{block}
+You should provide some description of the data. how many observations and variables. How recent is the data. etc...
+```
+
+
+4. Overall layout
+
+We are going to analyze the best type of vehicle such as what kinds of vehicle is worth to have. Using the variable like alvtype, charge120, city MPG and so on to compare with. 
+```{block}
+The layout should describe the structure o the app in terms of side par layout, types of tabs or grids and what kinds of objects will go on each aspect.
+Suggest tabs for the following
+1. Single variable analysis
+2. Bivariate/Trivariate analysis 
+3. Prediction of MPG as a response variable while users select up to five variables they want in a model (and be able to log them) along with outputs from a Linear Model and residual plots
+
+```
+
+
+5. Data Analysis and Visualization with User Choices and Results
+
+We want to show the best ghg score vehicle with plot and find the most fuel-efficient vehicle. Also we want to find the relation between displ with fuel cost and let the user type the price he/she are going to put and get how long the distance of vehicle can go. We also want to compare with the electricity vehicle and gas vehicle when the situation is in the same distance, and how much the price of energy would differ. Moreover, we want to find out that the vehicle with the start-stop system or not, in cityCD, how much the use of energe of it would differ. If we find anything special,  we would add on at any time. 
+
+```{block}
+It is not as interesting to determine which vehicle has the best overall mpg . Focus instead on allowing users to predict the MPG for a given set if attributes and then determine which vehicles are significantly above or below the mpg average. Is there something that makes them special - either good or bad.
+
+You should be able to compare across different vehicle types, manufacturers to see if there is really a technology difference between manufacturers or drive trains etc and use t.tests or AOV to assess the relationship
+
+The variables for the estimated range of a vehicle are only for the electric fuel and I did not see a variable for the fuel capacity for other vehicles so you can't use range other than for electric cars. 
+```
+
+
+6.
+We want to use t.test to find out that there is any significant relationship between CO2 with ghgscore. Also, use t.test to find out that there is any significant relationship between displ with city gasoline consumption. If we find anything special,  we would add on at any time. 
+
+```{block}
+
+Do not limit to just one hypothesis (e.g. disp) but allow users to select multiple variables to predict and then see if their model is a good one in terms of both fit and the compliance with the assumptions about the residuals. 
+```
+
+7. Allocation of Responsibilities for the team
+
+Since we only have two people, we split the work half and half.
+
+
+8. Project Steps/Schedule
+
+Step1: load the data and tidy it (week 10)
+
+Step2: Build best function (week 11)
+
+Step3: create shiny app and set up the input (week 12)
+
+Step4: finish the output and test it (week 13)
+
+Step5: prepare presentation  (week 14)
+
+
+
