@@ -156,7 +156,9 @@ ui <- dashboardPage(
                 column(width = 2,
                        selectInput("fuel_Type", "What fuel type are you looking for?", choices =  fuel_1$fuelType),
                        selectInput("fuel_Type_1", "What another fuel type are you looking for?", choices =  fuel_1$fuelType),
-                       selectInput("year", "whcih year?", choices = fuel_year$year, selected = "2020"),
+                       selectInput("year", "which year?", choices = fuel_year$year, selected = "2020"),
+                       selectInput("Brand", "What brand?", choices = brand, selected = "Toyota"),
+                       selectInput("Brand1", "What brand?", choices = brand, selected = "Toyota"),
                        checkboxInput("green", "Green House Score"),
                        checkboxInput("trany", "transmission of the car"),
                        checkboxInput("cost", "fuel cost"),
@@ -588,6 +590,7 @@ server <- function(input, output, session) {
     fuel%>%
       filter(year == input$year)%>%
       filter(fuelType == input$fuel_Type)%>%
+      filter(make == input$Brand)%>%
       select(make, city08, model,fuelType, ghgScore,fuelCost08)%>%
       unite(make, model, col = "cartype", sep =" ")%>%
       unique() ->a
@@ -651,6 +654,7 @@ server <- function(input, output, session) {
     fuel%>%
       filter(year == input$year)%>%
       filter(fuelType == input$fuel_Type_1)%>%
+      filter(make == input$Brand1)%>%
       select(make, city08, model,fuelType, ghgScore, fuelCost08)%>%
       unite(make, model, col = "cartype", sep =" ")%>%
       unique() ->a
