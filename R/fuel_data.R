@@ -3,8 +3,8 @@ library(tidyverse)
 library(stringr)
 
 # Data Ingest
-vehicles = read_csv("vehicles.csv")
-fuel = read_csv("vehicles.csv")
+vehicles = read_csv("../data/vehicles.csv")
+fuel = read_csv("../data/vehicles.csv")
 
 vehicles_select_cols <- c("id", "make", "model", "year", "phevBlended", 
                           "drive","cylinders","displ","fuelType", "fuelType1", "fuelType2", 
@@ -91,4 +91,4 @@ fuel%>%
 
 fuel%>%
   keep(is.numeric)%>%
-  select(city08,ghgScore,displ,fuelCost08)-> fuel_2
+  select(city08,ghgScore,displ,fuelCost08,co2,cylinders)-> fuel_2
