@@ -760,9 +760,13 @@ server <- function(input, output, session) {
       }
   })
   output$plot_4 <- renderPrint({
-    lm(fuel_2[[input$value_2]]~fuel_3[[input$value_1]]) ->b
-    coef(b)[1] +coef(b)[2]*input$xvalue -> c
-    c[[1]]
+    data.frame(x= fuel_3[[input$value_1]], y= fuel_2[[input$value_2]]) -> df
+    lm(y ~ x, data = df) -> b
+    predict(b, data.frame(x = input$xvalue))
+    #Hack Technology
+    #lm(fuel_2[[input$value_2]]~fuel_3[[input$value_1]]) ->b
+    #coef(b)[1] +coef(b)[2]*input$xvalue -> c
+    #c[[1]]
     
   })
 }

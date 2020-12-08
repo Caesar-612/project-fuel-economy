@@ -201,9 +201,13 @@ server <- function(input, output, session) {
   })
 
   output$plot_4 <- renderPrint({
-    lm(fuel_2[[input$value_2]]~fuel_2[[input$value_1]]) ->b
-    coef(b)[1] +coef(b)[2]*input$xvalue
-
+    #x <- fuel_2[[input$value_1]]
+    #y <- fuel_2[[input$value_2]]
+    data.frame(x= fuel_2[[input$value_1]], y= fuel_2[[input$value_2]]) -> df
+    lm(y ~ x, data = df) -> b
+    #lm(fuel_2[[input$value_2]]~fuel_2[[input$value_1]]) ->b
+    #coef(b)[1] +coef(b)[2]*input$xvalue
+    predict(b, data.frame(x = input$xvalue))
   })
 }
 
