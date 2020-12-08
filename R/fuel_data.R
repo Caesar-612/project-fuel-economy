@@ -3,8 +3,8 @@ library(tidyverse)
 library(stringr)
 
 # Data Ingest
-vehicles = read_csv("vehicles.csv")
-fuel = read_csv("vehicles.csv")
+vehicles = read_csv("../data/vehicles.csv")
+fuel = read_csv("../data/vehicles.csv")
 
 vehicles_select_cols <- c("id", "make", "model", "year", "phevBlended", 
                           "drive","cylinders","displ","fuelType", "fuelType1", "fuelType2", 
