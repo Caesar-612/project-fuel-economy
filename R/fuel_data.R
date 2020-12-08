@@ -91,4 +91,4 @@ fuel%>%
 
 fuel%>%
   keep(is.numeric)%>%
-  select(city08,ghgScore,displ,fuelCost08)-> fuel_2
+  select(city08,ghgScore,displ,fuelCost08,co2,cylinders)-> fuel_2
