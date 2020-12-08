@@ -72,9 +72,9 @@ d) Based on the analyze of above. The last one is for users to choose any car th
 
 a) Statistical Analysis part
 ![half-size image](2020-12-07 (5).png){#id .class width=100% height=100%}
-   * We decide to fine out the how cylinders and displ affect other factor which is the a component of car.
+   * We decide to fine out the how cylinders and displ affect other factor which is the a component of car. Also the user can type an x value to predict the y value. Log check box added.
    * User can select cylinders or displ for x axis and co2, fuel cost, city08, ghgscore for y axis and type a number to predict y value base on x value and also there is an summary to explain the plot user got.
-
+   *The output will show a distribution base on the select value and also a line to show the linear relation between two values. Also there is a summary and prediction on it. user can see the the log plot after clicking the check box
 ### References
 
 1) https://gasprices.aaa.com/state-gas-price-averages/
