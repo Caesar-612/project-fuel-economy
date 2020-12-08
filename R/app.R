@@ -153,7 +153,7 @@ ui <- dashboardPage(
               hr(),
               fluidRow(
                 
-                column(width = 3,
+                column(width = 2,
                        selectInput("fuel_Type", "What fuel type are you looking for?", choices =  fuel_1$fuelType),
                        selectInput("fuel_Type_1", "What another fuel type are you looking for?", choices =  fuel_1$fuelType),
                        selectInput("year", "whcih year?", choices = fuel_year$year, selected = "2020"),
@@ -170,11 +170,11 @@ ui <- dashboardPage(
                 
                 
                 
-                column(width = 4,
+                column(width = 5,
                        plotOutput("colplot")
                        
                 ),
-                column(width = 4,
+                column(width = 5,
                        plotOutput("plot_1")
                 ),
               )
@@ -209,11 +209,7 @@ ui <- dashboardPage(
       
     )
     
-  )
-  
-  
-  
-)
+  ))
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
   observeEvent(input$fuel_type_1, {
@@ -587,6 +583,170 @@ server <- function(input, output, session) {
              title = "Distribution of Annual Fuel Cost",hovermode="unified")
     
     ghg_hist
+  })
+  output$colplot <- renderPlot({
+    fuel%>%
+      filter(year == input$year)%>%
+      filter(fuelType == input$fuel_Type)%>%
+      select(make, city08, model,fuelType, ghgScore,fuelCost08)%>%
+      unite(make, model, col = "cartype", sep =" ")%>%
+      unique() ->a
+    if (input$green == TRUE & input$trany == TRUE){
+      fuel%>%
+        filter(year == input$year)%>%
+        filter(fuelType == input$fuel_Type)%>%
+        select(make, city08, model,fuelType, ghgScore,trany)%>%
+        unite(make, model, trany, col = "cartype", sep =" ")%>%
+        unique()%>%
+        slice_max(city08,n =input$bins)%>%
+        ggplot(aes(x = cartype, y = city08, fill = factor(ghgScore)))+
+        geom_col()+
+        coord_flip()+
+        ylab("miles per gallon")+
+        theme_bw()
+    }
+    else if (input$green == TRUE){
+      a%>%
+        slice_max(city08,n =input$bins)%>%
+        ggplot(aes(x = cartype, y = city08, fill = factor(ghgScore)))+
+        geom_col()+
+        coord_flip()+
+        ylab("miles per gallon")+
+        theme_bw()
+    }
+    else if (input$trany == TRUE){
+      fuel%>%
+        filter(year == input$year)%>%
+        filter(fuelType == input$fuel_Type)%>%
+        select(make, city08, model,fuelType, ghgScore,trany)%>%
+        unite(make, model, trany, col = "cartype", sep =" ")%>%
+        unique()%>%
+        slice_max(city08,n =input$bins)%>%
+        ggplot(aes(x = cartype, y = city08))+
+        geom_col()+
+        coord_flip()+
+        ylab("miles per gallon")+
+        theme_bw()
+    }
+    else if (input$cost == TRUE){
+      a%>%
+        slice_max(city08,n =input$bins)%>%
+        ggplot(aes(x = cartype, y = city08, fill = as.factor(fuelCost08)))+
+        geom_col()+
+        coord_flip()+
+        ylab("miles per gallon")+
+        theme_bw()
+    }
+    else{
+      a%>%
+        slice_max(city08,n =input$bins)%>%
+        ggplot(aes(x = cartype, y = city08))+
+        geom_col()+
+        coord_flip()+
+        ylab("miles per gallon")+
+        theme_bw()
+    }
+  })
+  output$plot_1 <- renderPlot({
+    fuel%>%
+      filter(year == input$year)%>%
+      filter(fuelType == input$fuel_Type_1)%>%
+      select(make, city08, model,fuelType, ghgScore, fuelCost08)%>%
+      unite(make, model, col = "cartype", sep =" ")%>%
+      unique() ->a
+    if (input$green == TRUE & input$trany == TRUE){
+      fuel%>%
+        filter(year == input$year)%>%
+        filter(fuelType == input$fuel_Type_1)%>%
+        select(make, city08, model,fuelType, ghgScore,trany)%>%
+        unite(make, model, trany, col = "cartype", sep =" ")%>%
+        unique()%>%
+        slice_max(city08,n =input$bins)%>%
+        ggplot(aes(x = cartype, y = city08, fill = factor(ghgScore)))+
+        geom_col()+
+        coord_flip()+
+        ylab("miles per gallon")+
+        theme_bw()
+    }
+    else if (input$green == TRUE){
+      a%>%
+        slice_max(city08,n =input$bins)%>%
+        ggplot(aes(x = cartype, y = city08, fill = factor(ghgScore)))+
+        geom_col()+
+        coord_flip()+
+        ylab("miles per gallon")+
+        theme_bw()
+    }
+    else if (input$trany == TRUE){
+      fuel%>%
+        filter(year == input$year)%>%
+        filter(fuelType == input$fuel_Type_1)%>%
+        select(make, city08, model,fuelType, ghgScore,trany)%>%
+        unite(make, model, trany, col = "cartype", sep =" ")%>%
+        unique()%>%
+        slice_max(city08,n =input$bins)%>%
+        ggplot(aes(x = cartype, y = city08))+
+        geom_col()+
+        coord_flip()+
+        ylab("miles per gallon")+
+        theme_bw()
+    }
+    else if (input$cost == TRUE){
+      a%>%
+        slice_max(city08,n =input$bins)%>%
+        ggplot(aes(x = cartype, y = city08, fill = as.factor(fuelCost08)))+
+        geom_col()+
+        coord_flip()+
+        ylab("miles per gallon")+
+        theme_bw()
+    }
+    else{
+      a%>%
+        slice_max(city08,n =input$bins)%>%
+        ggplot(aes(x = cartype, y = city08))+
+        geom_col()+
+        coord_flip()+
+        ylab("miles per gallon")+
+        theme_bw()
+    }
+  })
+  output$plot_2 <- renderPlot({
+    if (input$log == TRUE){
+      fuel_2%>%
+        ggplot(aes( x= !!input$value_1, y= !!input$value_2))+
+        geom_point()+
+        geom_smooth(method = lm, se = FALSE)+
+        scale_x_log10()+
+        scale_y_log10()+
+        theme_bw()
+    }
+    else {
+      fuel_2%>%
+        ggplot(aes( x= !!input$value_1, y= !!input$value_2))+
+        geom_point()+
+        geom_smooth(method = lm, se = FALSE)+
+        theme_bw()}
+  })
+  output$plot_3 <- renderPrint({
+    lm(fuel_2[[input$value_2]]~fuel_2[[input$value_1]])%>%
+      summary()
+  })
+  x1_name <- reactive({
+    input$value_1
+  })
+  x <- reactive({
+    lm(fuel_2[[input$value_2]]~fuel_2[[input$value_1]]) -> b
+    data.frame(x1 = c(input$xvalue))-> df
+    #colnames(df) <- input$value_1
+    #df%>%
+    #rename(x1_name() = "x1")->df
+    #df
+  })
+  output$plot_4 <- renderPrint({
+    lm(fuel_2[[input$value_2]]~fuel_2[[input$value_1]]) ->b
+    coef(b)[1] +coef(b)[2]*input$xvalue -> c
+    c[[1]]
+    
   })
 }
 # Run the application 
