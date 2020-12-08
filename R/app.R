@@ -13,7 +13,7 @@ library(lazyeval)
 ui <- dashboardPage(
   skin = "yellow",
   dashboardHeader(titleWidth = 380,
-                  title = "Fuel Economy"),
+                  title = "Fuel Economy and Vehicle"),
   
   dashboardSidebar(
     width = 380,
@@ -157,7 +157,7 @@ ui <- dashboardPage(
                        selectInput("fuel_Type", "What fuel type are you looking for?", choices =  fuel_1$fuelType),
                        selectInput("fuel_Type_1", "What another fuel type are you looking for?", choices =  fuel_1$fuelType),
                        selectInput("year", "which year?", choices = fuel_year$year, selected = "2020"),
-                       selectInput("Brand", "What brand?", choices = brand, selected = "Toyota"),
+           selectInput("Brand", "What brand?", choices = brand, selected = "Toyota"),
                        selectInput("Brand1", "What brand?", choices = brand, selected = "Toyota"),
                        checkboxInput("green", "Green House Score"),
                        checkboxInput("trany", "transmission of the car"),
