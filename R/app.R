@@ -156,9 +156,9 @@ ui <- dashboardPage(
                 column(width = 2,
                        selectInput("fuel_Type", "What fuel type are you looking for?", choices =  fuel_1$fuelType),
                        selectInput("fuel_Type_1", "What another fuel type are you looking for?", choices =  fuel_1$fuelType),
-                       selectInput("year", "which year?", choices = fuel_year$year, selected = "2020"),
-           selectInput("Brand", "What brand?", choices = brand, selected = "Toyota"),
-                       selectInput("Brand1", "What brand?", choices = brand, selected = "Toyota"),
+                       selectInput("year1", "which year?", choices = fuel_year$year, selected = "2020"),
+                       selectInput("Brand", "What brand for the left plot?", choices = brand, selected = "Toyota"),
+                       selectInput("Brand1", "What brand for the right plot?", choices = brand, selected = "Toyota"),
                        checkboxInput("green", "Green House Score"),
                        checkboxInput("trany", "transmission of the car"),
                        checkboxInput("cost", "fuel cost"),
@@ -190,9 +190,10 @@ ui <- dashboardPage(
               
               fluidRow(
                 column(width=3,
-                       varSelectInput("value_1", "X value?", data =  fuel_2),
+                       varSelectInput("value_1", "X value?", data =  fuel_3),
                        varSelectInput("value_2", "Y value?", data =  fuel_2),
-                       checkboxInput("log", "better to observe"),
+                       checkboxInput("logx", "Log X"),
+                       checkboxInput("logy", "Log Y"),
                        numericInput("xvalue", "Predict Y base on X value", value = 10, min = 0, max = 100),
                        verbatimTextOutput("plot_4")
                 ),
@@ -588,7 +589,7 @@ server <- function(input, output, session) {
   })
   output$colplot <- renderPlot({
     fuel%>%
-      filter(year == input$year)%>%
+      filter(year == input$year1)%>%
       filter(fuelType == input$fuel_Type)%>%
       filter(make == input$Brand)%>%
       select(make, city08, model,fuelType, ghgScore,fuelCost08)%>%
@@ -596,8 +597,9 @@ server <- function(input, output, session) {
       unique() ->a
     if (input$green == TRUE & input$trany == TRUE){
       fuel%>%
-        filter(year == input$year)%>%
+        filter(year == input$year1)%>%
         filter(fuelType == input$fuel_Type)%>%
+        filter(make == input$Brand)%>%
         select(make, city08, model,fuelType, ghgScore,trany)%>%
         unite(make, model, trany, col = "cartype", sep =" ")%>%
         unique()%>%
@@ -619,8 +621,9 @@ server <- function(input, output, session) {
     }
     else if (input$trany == TRUE){
       fuel%>%
-        filter(year == input$year)%>%
+        filter(year == input$year1)%>%
         filter(fuelType == input$fuel_Type)%>%
+        filter(make == input$Brand)%>%
         select(make, city08, model,fuelType, ghgScore,trany)%>%
         unite(make, model, trany, col = "cartype", sep =" ")%>%
         unique()%>%
@@ -652,7 +655,7 @@ server <- function(input, output, session) {
   })
   output$plot_1 <- renderPlot({
     fuel%>%
-      filter(year == input$year)%>%
+      filter(year == input$year1)%>%
       filter(fuelType == input$fuel_Type_1)%>%
       filter(make == input$Brand1)%>%
       select(make, city08, model,fuelType, ghgScore, fuelCost08)%>%
@@ -660,8 +663,9 @@ server <- function(input, output, session) {
       unique() ->a
     if (input$green == TRUE & input$trany == TRUE){
       fuel%>%
-        filter(year == input$year)%>%
+        filter(year == input$year1)%>%
         filter(fuelType == input$fuel_Type_1)%>%
+        filter(make == input$Brand1)%>%
         select(make, city08, model,fuelType, ghgScore,trany)%>%
         unite(make, model, trany, col = "cartype", sep =" ")%>%
         unique()%>%
@@ -683,8 +687,9 @@ server <- function(input, output, session) {
     }
     else if (input$trany == TRUE){
       fuel%>%
-        filter(year == input$year)%>%
+        filter(year == input$year1)%>%
         filter(fuelType == input$fuel_Type_1)%>%
+        filter(make == input$Brand1)%>%
         select(make, city08, model,fuelType, ghgScore,trany)%>%
         unite(make, model, trany, col = "cartype", sep =" ")%>%
         unique()%>%
@@ -715,39 +720,47 @@ server <- function(input, output, session) {
     }
   })
   output$plot_2 <- renderPlot({
-    if (input$log == TRUE){
-      fuel_2%>%
-        ggplot(aes( x= !!input$value_1, y= !!input$value_2))+
-        geom_point()+
-        geom_smooth(method = lm, se = FALSE)+
+    fuel%>%
+      ggplot(aes( x= !!input$value_1, y= !!input$value_2))+
+      geom_point()+
+      geom_smooth(method = lm, se = FALSE)+
+      theme_bw() -> aa
+    if (input$logx == TRUE & input$logy == TRUE){
+      aa+
         scale_x_log10()+
-        scale_y_log10()+
-        theme_bw()
+        scale_y_log10()
+    }
+    else if (input$logx ==TRUE){
+      aa+
+        scale_x_log10()
+    }
+    else if (input$logy == TRUE){
+      aa+
+        scale_y_log10()
     }
     else {
-      fuel_2%>%
-        ggplot(aes( x= !!input$value_1, y= !!input$value_2))+
-        geom_point()+
-        geom_smooth(method = lm, se = FALSE)+
-        theme_bw()}
+      aa
+    }
   })
   output$plot_3 <- renderPrint({
-    lm(fuel_2[[input$value_2]]~fuel_2[[input$value_1]])%>%
+    x <- fuel_3[[input$value_1]]
+    y <- fuel_2[[input$value_2]]
+    if(input$logx == TRUE & input$logy == TRUE){
+      lm(log(y) ~ log(x))%>%summary()
+    }
+    else if (input$logx == TRUE){
+      lm(y ~ log(x))%>%summary()
+    }
+    else if (input$logy == TRUE){
+      lm(log(y) ~ x)%>%summary()
+    }
+    else{
+      lm(y ~ x)%>%
       summary()
-  })
-  x1_name <- reactive({
-    input$value_1
-  })
-  x <- reactive({
-    lm(fuel_2[[input$value_2]]~fuel_2[[input$value_1]]) -> b
-    data.frame(x1 = c(input$xvalue))-> df
-    #colnames(df) <- input$value_1
-    #df%>%
-    #rename(x1_name() = "x1")->df
-    #df
+      }
   })
   output$plot_4 <- renderPrint({
-    lm(fuel_2[[input$value_2]]~fuel_2[[input$value_1]]) ->b
+    lm(fuel_2[[input$value_2]]~fuel_3[[input$value_1]]) ->b
     coef(b)[1] +coef(b)[2]*input$xvalue -> c
     c[[1]]
     

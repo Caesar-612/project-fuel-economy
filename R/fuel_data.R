@@ -91,7 +91,9 @@ fuel%>%
 
 fuel%>%
   keep(is.numeric)%>%
-  select(city08,ghgScore,displ,fuelCost08,co2,cylinders)-> fuel_2
+  select(city08,ghgScore,fuelCost08,co2)-> fuel_2
+fuel%>%
+  select(cylinders,displ)-> fuel_3
 fuel%>%
   select(make)%>%
   unique() -> brand

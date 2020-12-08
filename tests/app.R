@@ -199,17 +199,7 @@ server <- function(input, output, session) {
     lm(fuel_2[[input$value_2]]~fuel_2[[input$value_1]])%>%
       summary()
   })
-  x1_name <- reactive({
-    input$value_1
-  })
-  x <- reactive({
-    lm(fuel_2[[input$value_2]]~fuel_2[[input$value_1]]) -> b
-    data.frame(x1 = c(input$xvalue))-> df
-    #colnames(df) <- input$value_1
-    #df%>%
-      #rename(x1_name() = "x1")->df
-    #df
-  })
+
   output$plot_4 <- renderPrint({
     lm(fuel_2[[input$value_2]]~fuel_2[[input$value_1]]) ->b
     coef(b)[1] +coef(b)[2]*input$xvalue

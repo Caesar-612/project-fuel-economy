@@ -191,12 +191,15 @@ fuel%>%
 y = 1.03987
 summary(x)$residual%>%summary()
 summary(x)$coefficients
+
 fuel_2%>%
   select(displ)
 lm(cylinders~fuelCost08, fuel_2)-> x
 x
-predict.lm(x,data.frame(fuelCost08 = 15))
+names(summary(x))
+summary(x)
 ```
+
 ```{r}
 data.frame(c(10))-> df
 colnames(df)<- "city08"
